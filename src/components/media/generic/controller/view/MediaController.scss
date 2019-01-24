@@ -1,0 +1,21 @@
+.media__controller {
+    display: flex;
+
+    margin: .2em;
+
+    > *:nth-child(n+2) {
+        margin-left: .3em;
+    }
+    .enabled {
+        cursor: pointer;
+    }
+
+    .disabled {
+        opacity: .2;
+        cursor: default;
+    }
+
+    .active {
+        color: green;
+    }
+}

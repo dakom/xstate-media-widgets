@@ -1,0 +1,44 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "module": "esNext",
+        "allowJs": true,
+        "baseUrl": ".",
+        "paths": {
+            "*": [
+                "node_modules/@types/*",
+                "*"
+            ],
+            "components/*": ["src/components/*"],
+            "utils/*": ["src/utils/*"]
+        },
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "moduleResolution": "node",
+        "outDir": "dist/tsc",
+        "noImplicitAny": false,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "target": "es5",
+        "jsx": "react",
+        "lib": [
+            "es6",
+            "es5",
+            "dom"
+        ]
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "test/**/*.ts",
+        "test/**/*.tsx",
+        "test/**/*.js"
+    ],
+
+    "exclude": [
+        "node_modules",
+        "dist",
+        "build",
+        "coverage"
+    ]
+}
