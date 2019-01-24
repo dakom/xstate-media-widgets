@@ -1,0 +1,14 @@
+.label {
+    margin-top: 1em;
+    display: flex;
+    align-items: center;
+
+    .text {
+        display: inline-block;
+        text-align: center;
+        margin: 0 auto;
+        margin-bottom: .2em;
+        color: darkblue;
+        border-bottom: 1px solid blue;
+    }
+}

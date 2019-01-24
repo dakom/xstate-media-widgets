@@ -1,8 +1,16 @@
 import {createElement as el} from "react";
 import {render} from "react-dom";
+import {addElementKeys} from "utils/Utils";
+import {Label} from "components/label/Label";
 import {AudioWidget} from "components/media/audio/widget/AudioWidget";
+import {VideoWidget} from "components/media/video/widget/VideoWidget";
 import "./Main.scss";
 
-const App = el(AudioWidget);
+const App = addElementKeys([
+    el(Label, {label: "Audio"}),
+    el(AudioWidget),
+    el(Label, {label: "Video"}),
+    el(VideoWidget),
+]);
 
 render(App, document.getElementById("app"));
