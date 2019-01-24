@@ -15,14 +15,12 @@ export const AudioWidget = () => {
         (createPlayer)
         (createRecorder)
         ({
-        startTime: () => clockMachineHook.service.send("START"),
-        stopTime: () => clockMachineHook.service.send("STOP"),
-        resetTime: () => clockMachineHook.service.send("RESET"),
-        handleFail: () => alert("got fail!")
+            startTime: () => clockMachineHook.service.send("START"),
+            stopTime: () => clockMachineHook.service.send("STOP"),
+            resetTime: () => clockMachineHook.service.send("RESET"),
+            handleFail: () => alert("got fail!")
         })
     );
-
-    console.log(audioControllerMachineHook.state.value);
 
     return el(View, null, addElementKeys([
         el(MediaController, {machineHook: audioControllerMachineHook}),

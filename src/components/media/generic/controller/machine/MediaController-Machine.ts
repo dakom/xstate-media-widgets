@@ -52,6 +52,28 @@ const makeConfig = <B>():MachineConfig<Context<B>, Schema, Event> => ({
             onEntry: 'stopTime'
         },
 
+        recording: {
+            onEntry: [
+                'eraseBuffer', 
+                'resetTime', 
+                'startTime',
+            ],
+            on: {
+                STOP: {
+                    actions: send('STOP', {to: "invoke.recorder"}),
+                },
+                FAIL: "fail"
+            },
+            invoke: {
+                src: 'recorderMachine',
+                id: 'invoke.recorder',
+                onDone: {
+                    target: 'stopped',
+                    actions: 'onRecordingFinished' 
+                },
+            },
+        },
+
         playing: {
             on: {
                 STOP: {
@@ -72,26 +94,11 @@ const makeConfig = <B>():MachineConfig<Context<B>, Schema, Event> => ({
                     node: () => none
                 }
             },
-            onEntry: 'startTime' 
+            onEntry: [
+                'startTime',
+            ]
         },
 
-        recording: {
-            on: {
-                STOP: {
-                    actions: send('STOP', {to: "invoke.recorder"}),
-                },
-                FAIL: "fail"
-            },
-            invoke: {
-                src: 'recorderMachine',
-                id: 'invoke.recorder',
-                onDone: {
-                    target: 'stopped',
-                    actions: 'stashBuffer' 
-                },
-            },
-            onEntry: ['eraseBuffer', 'resetTime', 'startTime']
-        },
 
         fail: {
             type: "final",
@@ -100,7 +107,7 @@ const makeConfig = <B>():MachineConfig<Context<B>, Schema, Event> => ({
     }
 })
 
-const makeOptions = <B> (createPlayer: () => Player<B>) => (createRecorder: () => Recorder<B>) => (props:ActionProps) => {
+const makeOptions = <B, PM, RM> (createPlayer: () => Player<B, PM>) => (createRecorder: () => Recorder<B, RM>) => (props:ActionProps) => {
     return {
         actions: makeActions(props),
         services: makeServices(createPlayer) (createRecorder)
@@ -108,5 +115,5 @@ const makeOptions = <B> (createPlayer: () => Player<B>) => (createRecorder: () =
 }
 
 
-export const makeMachine = <B>(createPlayer: () => Player<B>) => (createRecorder: () => Recorder<B>) => (props:ActionProps) =>  
-    Machine<Context<B>, Schema, Event>(makeConfig<B>(), makeOptions<B> (createPlayer) (createRecorder) (props));
+export const makeMachine = <B, PM, RM>(createPlayer: () => Player<B, PM>) => (createRecorder: () => Recorder<B, RM>) => (props:ActionProps) =>  
+    Machine<Context<B>, Schema, Event>(makeConfig<B>(), makeOptions<B, PM, RM> (createPlayer) (createRecorder) (props));

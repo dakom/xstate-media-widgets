@@ -1,5 +1,5 @@
-import {actions} from 'xstate';
-import {some, none} from 'fp-ts/lib/Option';
+import {DoneInvokeEvent, actions} from 'xstate';
+import {Option, some, none} from 'fp-ts/lib/Option';
 import {Thunk} from "utils/Utils";
 import {Context} from "./MediaController-Machine";
 import {makeMachine as makeRecorderMachine, Recorder} from "components/media/generic/recorder/machine/MediaRecorder-Machine";
@@ -19,15 +19,15 @@ export const makeActions = <B>(props:ActionProps) => {
         eraseBuffer: assign({
             buffer: () => none
         }),
-        stashBuffer: assign({
-            buffer: (_:Context<B>, evt:any) => {
-                return some(evt.data);
+        onRecordingFinished: assign({
+            buffer: (_:Context<B>, evt:DoneInvokeEvent<{buffer: Option<B>}>) => {
+                return evt.data.buffer;
             }
         })
     }
 }
 
-export const makeServices = <B>(createPlayer: () => Player<B>) => (createRecorder: () => Recorder<B>) => ({
+export const makeServices = <B, PM, RM>(createPlayer: () => Player<B, PM>) => (createRecorder: () => Recorder<B, RM>) => ({
     playerMachine: makePlayerMachine(createPlayer),
     recorderMachine: makeRecorderMachine(createRecorder),
 })

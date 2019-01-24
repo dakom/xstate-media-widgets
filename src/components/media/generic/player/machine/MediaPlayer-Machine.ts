@@ -5,8 +5,8 @@ import {makeActions, makeServices} from "./MediaPlayer-Effects";
 
 const {sendParent, log} = actions;
 
-export interface Player <B>{
-    start: (buffer:B) => Promise<any>;
+export interface Player <B, M> {
+    start: (buffer:B) => (onMeta: (meta:M) => void) => Promise<void>;
     stop: Thunk;
     dispose: Thunk;
 }
@@ -20,30 +20,32 @@ export interface Schema {
     };
 }
 
-export type Event =
+export type Event <M> =
     | { type: 'STOP' }
-    | { type: 'PLAY' }
+    | { type: 'META', data: M}
 
-export interface Context <B> {
+export interface Context <B, M> {
     buffer: Option<B>;
-    player: Option<Player<B>>;
+    player: Option<Player<B, M>>;
+    meta: Option<M>;
 }
 
-type Config <B> = MachineConfig<Context<B>, Schema, Event>;
+type Config <B, M> = MachineConfig<Context<B, M>, Schema, Event<M>>;
 
-const makeConfig = <B>():Config<B> => ({
+const makeConfig = <B, M>():Config<B, M> => ({
     id: 'playing',
     initial: "init",
     context: {
         buffer: none,
         player: none,
+        meta: none,
     },
     states: {
         init: {
             onEntry: 'createPlayer',
 
             on: {
-                PLAY: "play"
+                "": "play"
             }
         },
         play: {
@@ -51,6 +53,13 @@ const makeConfig = <B>():Config<B> => ({
             on: {
                 STOP: {
                     actions: "stopPlayer" 
+                },
+
+                /*
+                 * These are intended to be called by the invoked child only
+                 */
+                META: {
+                    actions: "updateMeta"
                 }
             },
 
@@ -78,10 +87,10 @@ const makeConfig = <B>():Config<B> => ({
     }
 })
 
-const makeOptions = <B>(createPlayer:() => Player<B>):any => ({
+const makeOptions = <B, M>(createPlayer:() => Player<B, M>):any => ({
     actions: makeActions(createPlayer),
-    services: makeServices<B>(),
+    services: makeServices<B, M>(),
 })
 
-export const makeMachine = <B>(createPlayer:() => Player<B>) =>  
-    Machine<Context<B>, Schema, Event>(makeConfig<B>(), makeOptions<B>(createPlayer));
+export const makeMachine = <B, M>(createPlayer:() => Player<B, M>) =>  
+    Machine<Context<B, M>, Schema, Event<M>>(makeConfig(), makeOptions(createPlayer));
