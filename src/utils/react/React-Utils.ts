@@ -1,7 +1,9 @@
 import {createElement as el, createElement, ReactElement} from "react";
 
 export const addElementKeys = (elements:Array<ReactElement<any>>) => 
-    elements.map((element, index) => {
+    elements
+        .filter(el => el != null)
+        .map((element, index) => {
         const props = element.props == null ? {key: index} : element.props;
 
         return props.hasOwnProperty("key") 

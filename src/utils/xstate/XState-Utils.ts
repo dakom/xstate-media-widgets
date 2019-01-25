@@ -21,7 +21,16 @@ export const makeEventSender =
                 ? some(() => service.send(evt))
                 : none;
 
-//adapted from https://github.com/carloslfu/use-machine
+/*adapted from https://github.com/carloslfu/use-machine
+    
+    One of the main differences is that we take a thunk that
+    gets run to create the machine.
+
+    This goes hand-in-hand with the other change:
+    Accepting deps so it will be re-created when deps change
+*/
+
+
 export interface MachineHook
     < TContext = any, TState extends StateSchema = any, TEvent extends EventObject = any >
     {
@@ -34,8 +43,8 @@ export function useMachine<
     TContext = any,
     TState extends StateSchema = any,
     TEvent extends EventObject = any
-    >(makeMachine:() => StateMachine<TContext, TState, TEvent>):MachineHook<TContext, TState, TEvent>  {
-        const machine = useMemo(makeMachine, []);
+    >(makeMachine:() => StateMachine<TContext, TState, TEvent>, deps:Array<any> = []):MachineHook<TContext, TState, TEvent>  {
+        const machine = useMemo(makeMachine, deps);
         
         const [state, setState] = useState<State<TContext, TEvent>>(
             machine.initialState
@@ -46,12 +55,12 @@ export function useMachine<
             .onTransition(state => setState(state as any))
             .onChange(setContext)
             .start()
-        , []);
+        , deps);
 
         // Stop the service when unmounting.
         useEffect(() => {
             return () => service.stop();
-        }, []);
+        }, deps);
 
         return { state, send: service.send, context, service};
     }

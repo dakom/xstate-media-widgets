@@ -1,8 +1,8 @@
 import * as React from "react";
 import "./KeylogWidget.scss";
 
-export const View = () => (
+export const View = ({children}) => (
     <div className="keylog__widget">
-        <div className="text">Coming Soon!</div>
+        {children}
     </div>
 )

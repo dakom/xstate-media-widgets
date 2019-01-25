@@ -1,12 +1,6 @@
 .keylog__widget {
     display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
-
-    .text {
-        display: inline-block;
-        text-align: center;
-        margin: 0 auto;
-        font-size: .5rem;
-        margin-bottom: .2em;
-    }
 }
