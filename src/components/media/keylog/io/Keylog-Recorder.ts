@@ -30,12 +30,13 @@ export const createRecorder = ():Recorder<KeyBuffer, RecorderMeta> => {
 
     const start = async (callbacks:RecorderCallbacks<KeyBuffer, RecorderMeta>):Promise<Option<KeyBuffer>> => {
         _recordStartTime = performance.now();
-        _buffer = {keys: []};
+        _buffer = {keys: [], finalStop: 0};
         _callbacks = callbacks;
         document.addEventListener("keyup", onKeyUp);
 
         return new Promise<Option<KeyBuffer>>(resolve => {
             _resolve = some(() => {
+                _buffer.finalStop = performance.now() - _recordStartTime;
                 resolve(_buffer.keys.length ? some(_buffer) : none);
             });
         })
@@ -50,16 +51,3 @@ export const createRecorder = ():Recorder<KeyBuffer, RecorderMeta> => {
     return {start, stop, dispose};
 }
 
-/*
- *
-export interface RecorderCallbacks <B,M> {
-    onBuffer: (buffer:Option<B>) => void;
-    onMeta: (meta:Option<M>) => void;
-}
-
-export interface Recorder <B, M> {
-    start: (callbacks:RecorderCallbacks<B,M>) => Promise<Option<B>>;
-    stop: Thunk;
-    dispose: Thunk;
-}
- */

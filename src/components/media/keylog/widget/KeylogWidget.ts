@@ -1,5 +1,5 @@
 import {createElement as el, useMemo} from "react";
-import {View} from "./view/KeylogWidget-View";
+import {View, KeyList} from "./view/KeylogWidget-View";
 import {addElementKeys, useMachine} from "utils/Utils";
 import {makeMachine as makeMediaControllerMachine} from "components/media/generic/controller/machine/MediaController-Machine";
 import {makeMachine as makeClockMachine} from "components/time/clock/machine/Clock-Machine";
@@ -25,9 +25,11 @@ export const KeylogWidget = () => {
     );
 
     const keyList:Option<KeyBuffer> = 
-        controllerMachineHook.state.matches("PLAY") ? controllerMachineHook.context.playerMeta
-        : controllerMachineHook.state.matches("RECORD") ? controllerMachineHook.context.recorderMeta
+        controllerMachineHook.state.matches("playing") ? controllerMachineHook.context.playerMeta
+        : controllerMachineHook.state.matches("recording") ? controllerMachineHook.context.recorderMeta
         : none as Option<KeyBuffer>;
+
+    const mKeys = keyList.map(buffer => buffer.keys.map(k => k.key));
 
 
     return el(View, null, addElementKeys([
@@ -37,7 +39,11 @@ export const KeylogWidget = () => {
                 record: "fas fa-keyboard"
             }
         }),
-        el(Clock, {machineHook: clockMachineHook})
+
+        el(Clock, {machineHook: clockMachineHook}),
+
+        mKeys.map(keys => el(KeyList, {keys})).getOrElse(null)
+
     ]));
 
 }

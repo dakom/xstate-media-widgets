@@ -12,7 +12,7 @@ const App = addElementKeys([
     el(AudioWidget),
     el(Label, {label: "Video"}),
     el(VideoWidget),
-    el(Label, {label: "Keylog (coming soon...)"}),
+    el(Label, {label: "Keylog"}),
     el(KeylogWidget),
 ]);
 
