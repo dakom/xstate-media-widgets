@@ -5,8 +5,11 @@ import {makeActions, makeServices} from "./MediaPlayer-Effects";
 
 const {sendParent, log} = actions;
 
+export interface PlayerCallbacks <M> {
+    onMeta: (meta:Option<M>) => void;
+}
 export interface Player <B, M> {
-    start: (buffer:B) => (onMeta: (meta:M) => void) => Promise<void>;
+    start: (buffer:B) => (callbacks:PlayerCallbacks<M>) => Promise<void>;
     stop: Thunk;
     dispose: Thunk;
 }

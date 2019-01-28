@@ -8,16 +8,24 @@ export const View = ({children}) => (
     </div>
 )
 
-export const Video = ({stream}:{stream?:MediaStream}) => {
+interface VideoProps {
+    stream?: MediaStream;
+    url?: string;
+    onEnded: () => void;
+}
+
+export const Video = ({stream, url, onEnded}:VideoProps) => {
 
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
         //console.log("CHANGING VIDEO SOURCE", stream);
+        //console.log("CHANGING VIDEO URL", url);
         videoRef.current.srcObject = stream;
-    }, [stream])
+        videoRef.current.src = url;
+    }, [stream, url])
 
-    return <video autoPlay={true} ref={videoRef} />
+    return <video autoPlay={true} ref={videoRef} onEnded={onEnded} />
 }
 
 interface DevicePickerProps {

@@ -54,7 +54,7 @@ const makeConfig = <B, PM, RM>():MachineConfig<Context<B, PM, RM>, Schema, Event
                 RECORD: "recording",
                 ERASE: "empty"
             },
-            onEntry: 'stopTime'
+            onEntry: ['stopTime', 'clearMeta']
         },
 
         recording: {

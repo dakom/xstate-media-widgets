@@ -27,7 +27,7 @@ export const VideoWidget = () => {
             startTime: () => clockMachineHook.service.send("START"),
             stopTime: () => clockMachineHook.service.send("STOP"),
             resetTime: () => clockMachineHook.service.send("RESET"),
-            handleFail: () => alert("got fail!")
+            handleFail: () => alert("got fail!"),
         })
         , [activeDevice]); //The machine must be restarted with new device settings
 
@@ -42,7 +42,13 @@ export const VideoWidget = () => {
             })
     }, []);
 
+    const onPlayerEnded = () => {
+        controllerMachineHook.send("STOP");
+    }
+
     const stream = controllerMachineHook.context.recorderMeta.map(({stream}) => stream).getOrElse(null);
+
+    const url = controllerMachineHook.context.playerMeta.map(({url}) => url).getOrElse(null);
 
     return el(View, null, addElementKeys([
         devices.map(ds => 
@@ -52,11 +58,16 @@ export const VideoWidget = () => {
                 onSelected: (id:string) => setActiveDevice(some(id))
             })
         ).getOrElse(null), 
-        el(MediaController, {machineHook: controllerMachineHook}),
+        el(MediaController, {
+            machineHook: controllerMachineHook,
+            iconOverrides: {
+                record: "fas fa-video",
+            }
+        }),
         el(Clock, {machineHook: clockMachineHook}),
         controllerMachineHook.state.matches("recording")
         || controllerMachineHook.state.matches("playing")
-        ? el(Video, {stream})
+            ? el(Video, {stream, url, onEnded: onPlayerEnded})
             : null
     ]));
 

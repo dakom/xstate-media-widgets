@@ -1,15 +1,15 @@
 import {createElement as el} from "react";
-import {View, ViewProps, ActiveMode} from "./view/MediaController-View";
+import {View, ViewProps, ConfigurableViewProps, ActiveMode} from "./view/MediaController-View";
 import {Context, Schema, Event} from "./machine/MediaController-Machine";
 import {MachineHook, arrayHas, makeEventSender} from "utils/Utils";
 import {OmniEvent} from "xstate";
 import {some, none } from 'fp-ts/lib/Option'
 
-interface Props <B, PM, RM> {
+interface Props <B, PM, RM> extends ConfigurableViewProps {
     machineHook: MachineHook<Context<B, PM, RM>, Schema, Event<PM, RM>>;
 }
 
-export const MediaController = <B, PM, RM>({machineHook}:Props<B, PM, RM>) => {
+export const MediaController = <B, PM, RM>({machineHook, iconOverrides}:Props<B, PM, RM>) => {
     type MediaEvent = OmniEvent<Event<PM, RM>>;
 
     const {state, service} = machineHook; 
@@ -27,6 +27,7 @@ export const MediaController = <B, PM, RM>({machineHook}:Props<B, PM, RM>) => {
     //Thankfully it flows declaratively from the state machine!
     //(we could just pass state/context etc. but it's nicer to decouple)
     const props:ViewProps = {
+        iconOverrides, 
         onStop: makeEventHandler("STOP"),
         onPlay: makeEventHandler("PLAY"),
         onRecord: makeEventHandler("RECORD"),

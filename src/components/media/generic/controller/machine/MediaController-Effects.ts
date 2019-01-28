@@ -27,6 +27,10 @@ export const makeActions = <B, PM, RM>(props:ActionProps) => {
         }),
         updatePlayerMeta: assign({
             playerMeta: (_:Context<B, PM, RM>, evt:DoneInvokeEvent<Option<PM>>) => evt.data
+        }),
+        clearMeta: assign({
+            playerMeta: () => none,
+            recorderMeta: () => none
         })
     }
 }

@@ -1,4 +1,4 @@
-import {Player} from "components/media/generic/player/machine/MediaPlayer-Machine";
+import {Player, PlayerCallbacks} from "components/media/generic/player/machine/MediaPlayer-Machine";
 import {Thunk} from "utils/Utils";
 import { Option, none, some } from 'fp-ts/lib/Option';
 import {getAudioContext} from "./Audio-Context";
@@ -26,7 +26,7 @@ export const createPlayer = ():Player<Blob, PlayerMeta> => {
         _resolve= none;
     }
 
-    const start = (blob:Blob) => (_: (meta:PlayerMeta) => void) => {
+    const start = (blob:Blob) => (callbacks:PlayerCallbacks<PlayerMeta>) => {
         //Multi-channel playing should be done in a proper mixer
         stopPlayback();
 

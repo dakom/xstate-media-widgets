@@ -10,7 +10,7 @@ import "./Main.scss";
 const App = addElementKeys([
     el(Label, {label: "Audio"}),
     el(AudioWidget),
-    el(Label, {label: "Video (coming soon...)"}),
+    el(Label, {label: "Video"}),
     el(VideoWidget),
     el(Label, {label: "Keylog (coming soon...)"}),
     el(KeylogWidget),

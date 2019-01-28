@@ -3,7 +3,7 @@ import {OptionalThunk, optionIs} from "utils/Utils";
 import { Option} from 'fp-ts/lib/Option'
 import "./MediaController.scss";
 
-export interface ViewProps{
+export interface ViewProps extends ConfigurableViewProps {
     onStop: OptionalThunk;
     onPlay: OptionalThunk;
     onRecord: OptionalThunk;
@@ -11,12 +11,20 @@ export interface ViewProps{
     activeMode: Option<ActiveMode>;
 }
 
+export interface ConfigurableViewProps {
+    iconOverrides?: {
+        [K in IconName]?: string
+    }
+}
+
 export enum ActiveMode {
     RECORD = "record",
     PLAY = "play"
 }
 
-export const View = ({onStop, onPlay, onRecord, onErase, activeMode}: ViewProps) => {
+export const View = ({onStop, onPlay, onRecord, onErase, activeMode, iconOverrides}: ViewProps) => {
+
+    const iconLookup = {...defaultLookup, ...iconOverrides};
 
     const activeModeIs = optionIs(activeMode);
 
@@ -47,7 +55,7 @@ export const View = ({onStop, onPlay, onRecord, onErase, activeMode}: ViewProps)
 }
 
 
-const iconLookup:{
+const defaultLookup:{
     [K in IconName]: string
 }= {
     stop: "fas fa-stop-circle",

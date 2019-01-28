@@ -12,7 +12,7 @@ export const makeActions = <B, M>() => ({
         meta: (_:Context<B, M>, evt:DoneInvokeEvent<Option<M>>) => evt.data
     }),
 
-    updateParentMeta: (_:Context<B, M>, evt:DoneInvokeEvent<Option<M>>) => sendParent(evt)
+    updateParentMeta: sendParent((_:Context<B, M>, evt:DoneInvokeEvent<Option<M>>) => evt)
 })
 
 export const makeServices = <B, M>(createPlayer:() => Player<B, M>) => ({
@@ -21,8 +21,10 @@ export const makeServices = <B, M>(createPlayer:() => Player<B, M>) => ({
         ctx.buffer.map(buffer => {
             player.start
                 (buffer)
-                (meta => sendParent({type: "META", data: meta}))
-                .then(() => cbSend("DONE"))
+            ({
+                onMeta: meta => cbSend({type: "META", data: meta})
+            })
+            .then(() => cbSend("DONE"))
         })
 
         onEvent(evt => {
