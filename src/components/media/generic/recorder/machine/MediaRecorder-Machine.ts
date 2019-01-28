@@ -9,7 +9,6 @@ const {sendParent, log} = actions;
 //Note that onBuffer _replaces_ the entire buffer
 //So chunking should be handled locally
 export interface RecorderCallbacks <B,M> {
-    onBuffer: (buffer:Option<B>) => void;
     onMeta: (meta:Option<M>) => void;
 }
 
@@ -29,7 +28,6 @@ export interface Schema {
 
 export type Event <B, M> =
     | { type: 'STOP' }
-    | { type: 'BUFFER', data: B}
     | { type: 'DONE', data: B}
     | { type: 'META', data: M}
 
@@ -66,10 +64,6 @@ const makeConfig = <B, M>():Config<B, M> => ({
                     actions: ["updateMeta", "updateParentMeta"]
                 },
 
-                BUFFER: {
-                    actions: "replaceBuffer"
-                },
-
                 DONE: {
                     target: 'end',
                     actions: 'replaceBuffer'
@@ -81,7 +75,6 @@ const makeConfig = <B, M>():Config<B, M> => ({
             type: "final",
             data: {
                 buffer: (ctx:Context<B, M>) => ctx.buffer,
-                meta: (ctx:Context<B, M>) => ctx.meta
             }
         },
 

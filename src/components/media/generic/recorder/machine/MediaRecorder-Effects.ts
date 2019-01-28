@@ -25,7 +25,6 @@ export const makeServices = <B, M>(createRecorder:() => Recorder<B, M>) => ({
 
         recorder.start({
             onMeta: meta => cbSend({type: "META", data: meta}),
-            onBuffer: buffer => cbSend({type: "BUFFER", data: buffer})
         }).then(buffer => cbSend({type: "DONE", data: buffer}))
 
         onEvent(evt => {

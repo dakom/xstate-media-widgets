@@ -12,7 +12,7 @@ interface Props <B, PM, RM> extends ConfigurableViewProps {
 export const MediaController = <B, PM, RM>({machineHook, iconOverrides}:Props<B, PM, RM>) => {
     type MediaEvent = OmniEvent<Event<PM, RM>>;
 
-    const {state, service} = machineHook; 
+    const {state, service, context} = machineHook; 
 
     //console.log(state.value);
 
@@ -29,9 +29,9 @@ export const MediaController = <B, PM, RM>({machineHook, iconOverrides}:Props<B,
     const props:ViewProps = {
         iconOverrides, 
         onStop: makeEventHandler("STOP"),
-        onPlay: makeEventHandler("PLAY"),
+        onPlay: context.buffer.chain(() => makeEventHandler("PLAY")),
         onRecord: makeEventHandler("RECORD"),
-        onErase: makeEventHandler("ERASE"),
+        onErase: context.buffer.chain(() => makeEventHandler("ERASE")),
         activeMode: 
             state.matches("playing") ?  some(ActiveMode.PLAY) 
             : state.matches("recording") ?  some(ActiveMode.RECORD) 

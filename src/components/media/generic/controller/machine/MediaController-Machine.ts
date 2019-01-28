@@ -50,9 +50,15 @@ const makeConfig = <B, PM, RM>():MachineConfig<Context<B, PM, RM>, Schema, Event
 
         stopped : {
             on: {
-                PLAY: "playing",
+                PLAY: {
+                    target: "playing",
+                    cond: (ctx, _) => ctx.buffer.isSome()
+                },
                 RECORD: "recording",
-                ERASE: "empty"
+                ERASE: {
+                    target: "empty",
+                    cond: (ctx, _) => ctx.buffer.isSome()
+                }
             },
             onEntry: ['stopTime', 'clearMeta']
         },
@@ -94,6 +100,7 @@ const makeConfig = <B, PM, RM>():MachineConfig<Context<B, PM, RM>, Schema, Event
                 },
                 FAIL: "fail"
             },
+
             invoke: {
                 src: 'playerMachine',
                 id: 'invoked.player',
