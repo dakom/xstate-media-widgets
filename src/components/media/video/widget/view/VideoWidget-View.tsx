@@ -1,4 +1,4 @@
-import * as React from "react";
+import React,{useRef, useEffect} from "react";
 import { Option, none, some } from 'fp-ts/lib/Option';
 import "./VideoWidget.scss";
 
@@ -8,8 +8,17 @@ export const View = ({children}) => (
     </div>
 )
 
-export const Video = ({videoRef}) =>
-    <video ref={videoRef} />
+export const Video = ({stream}:{stream?:MediaStream}) => {
+
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    useEffect(() => {
+        //console.log("CHANGING VIDEO SOURCE", stream);
+        videoRef.current.srcObject = stream;
+    }, [stream])
+
+    return <video autoPlay={true} ref={videoRef} />
+}
 
 interface DevicePickerProps {
     devices: Array<MediaDeviceInfo>;

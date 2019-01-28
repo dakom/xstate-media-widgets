@@ -13,7 +13,6 @@ export interface Player <B, M> {
 
 export interface Schema {
     states: {
-        init: {};
         play: {};
         fail: {};
         end: {};
@@ -22,11 +21,11 @@ export interface Schema {
 
 export type Event <M> =
     | { type: 'STOP' }
+    | { type: 'DONE' }
     | { type: 'META', data: M}
 
 export interface Context <B, M> {
     buffer: Option<B>;
-    player: Option<Player<B, M>>;
     meta: Option<M>;
 }
 
@@ -34,20 +33,12 @@ type Config <B, M> = MachineConfig<Context<B, M>, Schema, Event<M>>;
 
 const makeConfig = <B, M>():Config<B, M> => ({
     id: 'playing',
-    initial: "init",
+    initial: "play",
     context: {
         buffer: none,
-        player: none,
         meta: none,
     },
     states: {
-        init: {
-            onEntry: 'createPlayer',
-
-            on: {
-                "": "play"
-            }
-        },
         play: {
 
             on: {
@@ -59,21 +50,18 @@ const makeConfig = <B, M>():Config<B, M> => ({
                  * These are intended to be called by the invoked child only
                  */
                 META: {
-                    actions: "updateMeta"
+                    actions: ["updateMeta", "updateParentMeta"]
+                },
+
+                DONE: {
+                    target: "end"
                 }
             },
 
             invoke: {
                 src: 'startPlayer',
-                onDone: {
-                    target: "end",
-                },
-                onError: {
-                    target: "fail"
-                }
+                id: "invoked.player"
             },
-
-            onExit: 'disposePlayer'
         },
         
         end: {
@@ -88,8 +76,8 @@ const makeConfig = <B, M>():Config<B, M> => ({
 })
 
 const makeOptions = <B, M>(createPlayer:() => Player<B, M>):any => ({
-    actions: makeActions(createPlayer),
-    services: makeServices<B, M>(),
+    actions: makeActions(),
+    services: makeServices<B, M>(createPlayer),
 })
 
 export const makeMachine = <B, M>(createPlayer:() => Player<B, M>) =>  

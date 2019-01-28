@@ -1,24 +1,12 @@
 import { actions, DoneInvokeEvent} from 'xstate';
 import {Option, none, some } from 'fp-ts/lib/Option'
-import {Recorder, Context} from "./MediaRecorder-Machine";
+import {Recorder, Context, Event} from "./MediaRecorder-Machine";
 
-const {assign, sendParent} = actions;
+const {assign, sendParent, send} = actions;
 
-export const makeActions = <B, M>(createRecorder:() => Recorder<B, M>) => ({
-    createRecorder: assign({
-        recorder: () => some(createRecorder()),
-    }),
+export const makeActions = <B, M>() => ({
 
-    disposeRecorder: assign({
-        recorder: (ctx:Context<B, M>) => {
-            ctx.recorder.map(recorder=> recorder.dispose());
-            return none as Option<Recorder<B, M>>
-        }
-    }),
-
-    stopRecorder: (ctx:Context<B, M>) => {
-        ctx.recorder.map(recorder=> recorder.stop())
-    },
+    stopRecorder: send("STOP", {to: "invoked.recorder"}),
 
     replaceBuffer: assign({
         buffer: (_:Context<B, M>, evt:DoneInvokeEvent<Option<B>>) => evt.data
@@ -26,18 +14,26 @@ export const makeActions = <B, M>(createRecorder:() => Recorder<B, M>) => ({
 
     updateMeta: assign({
         meta: (_:Context<B, M>, evt:DoneInvokeEvent<Option<M>>) => evt.data
-    })
+    }),
+
+    updateParentMeta: sendParent((_:Context<B, M>, evt:DoneInvokeEvent<Option<M>>) => evt)
 })
 
-export const makeServices = <B, M>() => ({
-    startRecorder: (ctx:Context<B, M>) => 
-        new Promise<Option<B>>((resolve) => {
-            ctx.recorder.map(recorder => {
-                recorder.start({
-                    onMeta: meta => sendParent({type: "META", data: meta}),
-                    onBuffer: buffer => sendParent({type: "BUFFER", data: buffer})
-                }).then(resolve)
-            })
-        })
-})
+export const makeServices = <B, M>(createRecorder:() => Recorder<B, M>) => ({
+    startRecorder: (ctx:Context<B, M>, evt:Event<B, M>) => (cbSend, onEvent) => {
+        const recorder = createRecorder();
 
+        recorder.start({
+            onMeta: meta => cbSend({type: "META", data: meta}),
+            onBuffer: buffer => cbSend({type: "BUFFER", data: buffer})
+        }).then(buffer => cbSend({type: "DONE", data: buffer}))
+
+        onEvent(evt => {
+            if(evt.type === "STOP") {
+                recorder.stop();
+            }
+        });
+
+        return recorder.dispose    
+    }
+})

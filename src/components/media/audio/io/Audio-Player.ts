@@ -3,7 +3,7 @@ import {Thunk} from "utils/Utils";
 import { Option, none, some } from 'fp-ts/lib/Option';
 import {getAudioContext} from "./Audio-Context";
 
-export type PlayerMeta = void;
+export interface PlayerMeta {};
 
 //Although it's a Blob here, it's probably RecorderBuffer from MediaBlob-Recorder
 //They are aliases for now ;)

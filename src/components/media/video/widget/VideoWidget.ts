@@ -12,15 +12,12 @@ import {Clock} from "components/time/clock/Clock";
 export const VideoWidget = () => {
     const clockMachineHook = useMachine(makeClockMachine); 
 
-    const videoRef = useRef(null);
-
     const [devices, setDevices] = useState<Option<Array<MediaDeviceInfo>>>(none);
 
     const [activeDevice, setActiveDevice] = useState<Option<string>>(none);
 
     const recordingOptions = { 
         video: activeDevice.map(exact => ({deviceId: {exact}})).getOrElse(true as any),
-        videoRef
     }
 
     const controllerMachineHook = useMachine(() => makeMediaControllerMachine<RecorderBuffer, PlayerMeta, RecorderMeta>
@@ -45,6 +42,8 @@ export const VideoWidget = () => {
             })
     }, []);
 
+    const stream = controllerMachineHook.context.recorderMeta.map(({stream}) => stream).getOrElse(null);
+
     return el(View, null, addElementKeys([
         devices.map(ds => 
             el(DevicePicker, {
@@ -57,7 +56,7 @@ export const VideoWidget = () => {
         el(Clock, {machineHook: clockMachineHook}),
         controllerMachineHook.state.matches("recording")
         || controllerMachineHook.state.matches("playing")
-            ? el(Video, {videoRef})
+        ? el(Video, {stream})
             : null
     ]));
 

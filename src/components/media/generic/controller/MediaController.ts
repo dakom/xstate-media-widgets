@@ -5,11 +5,13 @@ import {MachineHook, arrayHas, makeEventSender} from "utils/Utils";
 import {OmniEvent} from "xstate";
 import {some, none } from 'fp-ts/lib/Option'
 
-interface Props <B> {
-    machineHook: MachineHook<Context<B>, Schema, Event>;
+interface Props <B, PM, RM> {
+    machineHook: MachineHook<Context<B, PM, RM>, Schema, Event<PM, RM>>;
 }
 
-export const MediaController = <B>({machineHook}:Props<B>) => {
+export const MediaController = <B, PM, RM>({machineHook}:Props<B, PM, RM>) => {
+    type MediaEvent = OmniEvent<Event<PM, RM>>;
+
     const {state, service} = machineHook; 
 
     //console.log(state.value);
@@ -17,8 +19,8 @@ export const MediaController = <B>({machineHook}:Props<B>) => {
     //Little helper to just create a call to send(event)
     //But only in the case where that next event is valid
     //Returns it as an Option
-    const makeEventHandler = (evt:OmniEvent<Event>) =>
-        makeEventSender (service) (arrayHas(state.nextEvents as Array<OmniEvent<Event>>)) (evt) (evt)
+    const makeEventHandler = (evt:MediaEvent) =>
+        makeEventSender (service) (arrayHas(state.nextEvents as Array<MediaEvent>)) (evt) (evt)
 
     //View is just an expression of state 
     //It's up to the component here to set the right props

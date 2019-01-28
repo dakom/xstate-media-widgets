@@ -3,12 +3,13 @@ import {Recorder, RecorderCallbacks} from "components/media/generic/recorder/mac
 import { Option, none, some } from 'fp-ts/lib/Option';
 
 export type RecorderBuffer = Blob;
-export type RecorderMeta = void;
+export interface RecorderMeta {
+    stream:MediaStream;
+}
 
 export interface RecordingOptions {
     video?: any; //e.g. {deviceId: {exact: "MyDeviceId"}}
     audio?: boolean;
-    videoRef?: RefObject<HTMLVideoElement>;
 }
 
 export const createRecorder = (opts:RecordingOptions) => {
@@ -19,9 +20,6 @@ export const createRecorder = (opts:RecordingOptions) => {
         let _chunks:Array<ArrayBuffer>;
 
         const stop = () => {
-            if(opts.videoRef && opts.videoRef.current) {
-                opts.videoRef.current.src = "";
-            }
 
             _recorder.map(recorder => {
                 recorder.stop();
@@ -30,16 +28,13 @@ export const createRecorder = (opts:RecordingOptions) => {
             _recorder = none;
         }
 
-        const start = async (_:RecorderCallbacks<RecorderBuffer, RecorderMeta>):Promise<Option<RecorderBuffer>> => {
-
-            console.log(opts);
+        const start = async (callbacks:RecorderCallbacks<RecorderBuffer, RecorderMeta>):Promise<Option<RecorderBuffer>> => {
 
             return navigator.mediaDevices.getUserMedia(opts)
                 .then((stream) => new Promise<Option<RecorderBuffer>>(resolve  => {
-                    if(opts.videoRef && opts.videoRef.current) {
-                        opts.videoRef.current.srcObject = stream;
-                        opts.videoRef.current.play();
-                    }
+                    callbacks.onMeta(some({
+                        stream
+                    }));
 
                     _chunks = [];
 

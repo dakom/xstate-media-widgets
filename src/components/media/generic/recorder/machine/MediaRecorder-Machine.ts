@@ -3,7 +3,7 @@ import {Thunk} from "utils/Utils";
 import { Option, none } from 'fp-ts/lib/Option'
 import {makeActions, makeServices} from "./MediaRecorder-Effects";
 
-const {sendParent} = actions;
+const {sendParent, log} = actions;
 
 //These callbacks can be used to give progress reports
 //Note that onBuffer _replaces_ the entire buffer
@@ -21,7 +21,6 @@ export interface Recorder <B, M> {
 
 export interface Schema {
     states: {
-        init: {};
         record: {};
         fail: {};
         end: {};
@@ -31,11 +30,11 @@ export interface Schema {
 export type Event <B, M> =
     | { type: 'STOP' }
     | { type: 'BUFFER', data: B}
+    | { type: 'DONE', data: B}
     | { type: 'META', data: M}
 
 export interface Context <B, M>{
     buffer: Option<B>;
-    recorder: Option<Recorder<B, M>>;
     meta: Option<M>;
 }
 
@@ -43,20 +42,17 @@ type Config <B, M> = MachineConfig<Context<B, M>, Schema, Event<B, M>>;
 
 const makeConfig = <B, M>():Config<B, M> => ({ 
     id: 'recording',
-    initial: "init",
+    initial: "record",
     context: {
         buffer: none,
-        recorder: none,
         meta: none
     },
     states: {
-        init: {
-            onEntry: 'createRecorder',
-            on: {
-                "": "record"
-            }
-        },
         record: {
+            invoke: {
+                src: 'startRecorder',
+                id: "invoked.recorder"
+            },
             on: {
                 STOP: {
                     actions: "stopRecorder"
@@ -67,24 +63,18 @@ const makeConfig = <B, M>():Config<B, M> => ({
                  */
 
                 META: {
-                    actions: "updateMeta"
+                    actions: ["updateMeta", "updateParentMeta"]
                 },
 
                 BUFFER: {
                     actions: "replaceBuffer"
-                }
-            }, 
-            invoke: {
-                src: 'startRecorder',
-                onDone: {
+                },
+
+                DONE: {
                     target: 'end',
                     actions: 'replaceBuffer'
                 },
-
-                onError: {
-                    target: 'fail',
-                }
-            },
+            }, 
         },
 
         end: {
@@ -103,8 +93,8 @@ const makeConfig = <B, M>():Config<B, M> => ({
 })
 
 const makeOptions = <B, M>(createRecorder:() => Recorder<B, M>):any => ({
-    actions: makeActions(createRecorder),
-    services: makeServices<B, M>(),
+    actions: makeActions(),
+    services: makeServices<B, M>(createRecorder),
 })
 
 export const makeMachine = <B, M>(createRecorder: () => Recorder<B, M>) =>  
