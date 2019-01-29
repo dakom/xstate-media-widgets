@@ -2,10 +2,11 @@ import {Recorder, RecorderCallbacks} from "components/media/generic/recorder/mac
 import {Thunk} from "utils/Utils";
 import { Option, none, some } from 'fp-ts/lib/Option';
 import {KeyBuffer, KeyEvent} from "../types/Keylog-Types";
-
+import {Future, FutureInstance} from "fluture";
+export type RecorderError = string;
 export type RecorderMeta = KeyBuffer;
 
-export const createRecorder = ():Recorder<KeyBuffer, RecorderMeta> => {
+export const createRecorder = ():Recorder<KeyBuffer, RecorderMeta, RecorderError> => {
     let _resolve:Option<Thunk> = none;
     let _recordStartTime:number;
     let _buffer:KeyBuffer;
@@ -28,13 +29,13 @@ export const createRecorder = ():Recorder<KeyBuffer, RecorderMeta> => {
         _resolve= none;
     }
 
-    const start = async (callbacks:RecorderCallbacks<KeyBuffer, RecorderMeta>):Promise<Option<KeyBuffer>> => {
+    const start = (callbacks:RecorderCallbacks<KeyBuffer, RecorderMeta>):FutureInstance<RecorderError, Option<KeyBuffer>> => {
         _recordStartTime = performance.now();
         _buffer = {keys: [], finalStop: 0};
         _callbacks = callbacks;
         document.addEventListener("keyup", onKeyUp);
 
-        return new Promise<Option<KeyBuffer>>(resolve => {
+        return new Future<RecorderError, Option<KeyBuffer>>((reject, resolve) => {
             _resolve = some(() => {
                 _buffer.finalStop = performance.now() - _recordStartTime;
                 resolve(_buffer.keys.length ? some(_buffer) : none);

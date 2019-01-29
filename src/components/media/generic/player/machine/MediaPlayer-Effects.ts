@@ -15,7 +15,7 @@ export const makeActions = <B, M>() => ({
     updateParentMeta: sendParent((_:Context<B, M>, evt:DoneInvokeEvent<Option<M>>) => evt)
 })
 
-export const makeServices = <B, M>(createPlayer:() => Player<B, M>) => ({
+export const makeServices = <B, M, E>(createPlayer:() => Player<B, M, E>) => ({
     startPlayer: (ctx:Context<B, M>) => (cbSend, onEvent) => {
         const player = createPlayer();
         ctx.buffer.map(buffer => {
@@ -24,7 +24,13 @@ export const makeServices = <B, M>(createPlayer:() => Player<B, M>) => ({
             ({
                 onMeta: meta => cbSend({type: "META", data: meta})
             })
-            .then(() => cbSend("DONE"))
+            .fork(
+                err => cbSend({type: "REJECT", data: err}),
+                () => {
+                    console.log("resolving....");
+                    cbSend("RESOLVE")
+                }
+            )
         })
 
         onEvent(evt => {

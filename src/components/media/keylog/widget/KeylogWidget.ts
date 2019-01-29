@@ -4,8 +4,8 @@ import {addElementKeys, useMachine} from "utils/Utils";
 import {makeMachine as makeMediaControllerMachine} from "components/media/generic/controller/machine/MediaController-Machine";
 import {makeMachine as makeClockMachine} from "components/time/clock/machine/Clock-Machine";
 import {MediaController} from "components/media/generic/controller/MediaController";
-import {createPlayer, PlayerMeta} from "components/media/keylog/io/Keylog-Player";
-import {createRecorder, RecorderMeta} from "components/media/keylog/io/Keylog-Recorder";
+import {createPlayer, PlayerMeta, PlayerError} from "components/media/keylog/io/Keylog-Player";
+import {createRecorder, RecorderMeta, RecorderError} from "components/media/keylog/io/Keylog-Recorder";
 import {KeyBuffer} from "components/media/keylog/types/Keylog-Types";
 import { Option, none, some } from 'fp-ts/lib/Option';
 import {Clock} from "components/time/clock/Clock";
@@ -13,7 +13,7 @@ import {Clock} from "components/time/clock/Clock";
 export const KeylogWidget = () => {
     const clockMachineHook = useMachine(makeClockMachine); 
 
-    const controllerMachineHook = useMachine(() => makeMediaControllerMachine<KeyBuffer, PlayerMeta, RecorderMeta>
+    const controllerMachineHook = useMachine(() => makeMediaControllerMachine<KeyBuffer, PlayerMeta, RecorderMeta, PlayerError, RecorderError>
         (createPlayer)
         (createRecorder)
         ({

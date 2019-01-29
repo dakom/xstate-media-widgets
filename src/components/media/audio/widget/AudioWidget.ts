@@ -4,14 +4,15 @@ import {addElementKeys, useMachine} from "utils/Utils";
 import {makeMachine as makeMediaControllerMachine} from "components/media/generic/controller/machine/MediaController-Machine";
 import {makeMachine as makeClockMachine} from "components/time/clock/machine/Clock-Machine";
 import {MediaController} from "components/media/generic/controller/MediaController";
-import {createPlayer, PlayerMeta} from "components/media/audio/io/Audio-Player";
-import {createRecorder, RecorderBuffer, RecorderMeta} from "components/media/generic/recorder/io/MediaBlob-Recorder";
+import {createPlayer, PlayerMeta, PlayerError} from "components/media/audio/io/Audio-Player";
+import {createRecorder, RecorderMeta, RecorderError} from "components/media/generic/recorder/io/MediaBlob-Recorder";
+import {MediaBuffer} from "components/media/generic/types/Media-Types";
 import {Clock} from "components/time/clock/Clock";
 
 export const AudioWidget = () => {
     const clockMachineHook = useMachine(makeClockMachine); 
 
-    const controllerMachineHook = useMachine(() => makeMediaControllerMachine<RecorderBuffer, PlayerMeta, RecorderMeta>
+    const controllerMachineHook = useMachine(() => makeMediaControllerMachine<MediaBuffer, PlayerMeta, RecorderMeta, PlayerError, RecorderError>
         (createPlayer)
         (createRecorder ({audio: true}))
         ({

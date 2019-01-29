@@ -2,10 +2,11 @@ import {Player, PlayerCallbacks} from "components/media/generic/player/machine/M
 import {Thunk} from "utils/Utils";
 import { Option, none, some } from 'fp-ts/lib/Option';
 import {KeyBuffer, KeyEvent} from "../types/Keylog-Types";
-
+import {Future} from "fluture";
+export type PlayerError = string;
 export type PlayerMeta = KeyBuffer
 
-export const createPlayer = ():Player<KeyBuffer, PlayerMeta> => {
+export const createPlayer = ():Player<KeyBuffer, PlayerMeta, PlayerError> => {
     let _resolve:Option<Thunk> = none;
     let _timeoutIds:Array<Option<number>>;
 
@@ -24,7 +25,7 @@ export const createPlayer = ():Player<KeyBuffer, PlayerMeta> => {
     }
 
     const start = (buffer:KeyBuffer) => (callbacks:PlayerCallbacks<PlayerMeta>) => {
-        return new Promise<void>(resolve => {
+        return new Future<string, void>((_, resolve) => {
             _timeoutIds = buffer.keys.map((key, index) => {
                 return some(window.setTimeout(() => {
                     callbacks.onMeta(some(
@@ -40,7 +41,7 @@ export const createPlayer = ():Player<KeyBuffer, PlayerMeta> => {
                 stop();
             }, buffer.finalStop)));
 
-            _resolve = some(resolve);
+            _resolve = some(resolve as Thunk);
         });
     };
 

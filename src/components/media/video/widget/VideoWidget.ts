@@ -5,8 +5,9 @@ import {addElementKeys, useMachine} from "utils/Utils";
 import {makeMachine as makeMediaControllerMachine} from "components/media/generic/controller/machine/MediaController-Machine";
 import {makeMachine as makeClockMachine} from "components/time/clock/machine/Clock-Machine";
 import {MediaController} from "components/media/generic/controller/MediaController";
-import {createPlayer, PlayerMeta} from "components/media/video/io/Video-Player";
-import {createRecorder, RecorderBuffer, RecorderMeta} from "components/media/generic/recorder/io/MediaBlob-Recorder";
+import {createPlayer, PlayerMeta, PlayerError} from "components/media/video/io/Video-Player";
+import {MediaBuffer} from "components/media/generic/types/Media-Types";
+import {createRecorder, RecorderMeta, RecorderError} from "components/media/generic/recorder/io/MediaBlob-Recorder";
 import {Clock} from "components/time/clock/Clock";
 
 export const VideoWidget = () => {
@@ -20,7 +21,7 @@ export const VideoWidget = () => {
         video: activeDevice.map(exact => ({deviceId: {exact}})).getOrElse(true as any),
     }
 
-    const controllerMachineHook = useMachine(() => makeMediaControllerMachine<RecorderBuffer, PlayerMeta, RecorderMeta>
+    const controllerMachineHook = useMachine(() => makeMediaControllerMachine<MediaBuffer, PlayerMeta, RecorderMeta, PlayerError, RecorderError>
         (createPlayer)
         (createRecorder(recordingOptions))
         ({
@@ -41,6 +42,8 @@ export const VideoWidget = () => {
                 }
             })
     }, []);
+
+    //console.log(controllerMachineHook.state.value);
 
     const onPlayerEnded = () => {
         controllerMachineHook.send("STOP");

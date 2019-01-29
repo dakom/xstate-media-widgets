@@ -2,12 +2,13 @@ import {Player, PlayerCallbacks} from "components/media/generic/player/machine/M
 import {Thunk} from "utils/Utils";
 import { Option, none, some } from 'fp-ts/lib/Option';
 import {getAudioContext} from "./Audio-Context";
-
+import {Future, FutureInstance} from "fluture";
+export type PlayerError = string;
 export interface PlayerMeta {};
 
 //Although it's a Blob here, it's probably RecorderBuffer from MediaBlob-Recorder
 //They are aliases for now ;)
-export const createPlayer = ():Player<Blob, PlayerMeta> => {
+export const createPlayer = ():Player<Blob, PlayerMeta, PlayerError> => {
     let _fileReader:Option<FileReader> = none;
     let _node:Option<AudioBufferSourceNode> = none;
     let _resolve:Option<Thunk> = none;
@@ -30,8 +31,8 @@ export const createPlayer = ():Player<Blob, PlayerMeta> => {
         //Multi-channel playing should be done in a proper mixer
         stopPlayback();
 
-        return new Promise<void>((resolve, reject) => {
-            _resolve = some(resolve);
+        return new Future<PlayerError, void>((reject, resolve) => {
+            _resolve = some(resolve as Thunk);
 
             const fileReader = new FileReader();
             _fileReader = some(fileReader);
@@ -47,7 +48,7 @@ export const createPlayer = ():Player<Blob, PlayerMeta> => {
                         node.onended = stop;
                         node.start();
                     },
-                    reject
+                    err => reject(err.message)
                 );
             }
 

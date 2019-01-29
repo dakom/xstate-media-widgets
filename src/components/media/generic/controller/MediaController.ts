@@ -5,12 +5,12 @@ import {MachineHook, arrayHas, makeEventSender} from "utils/Utils";
 import {OmniEvent} from "xstate";
 import {some, none } from 'fp-ts/lib/Option'
 
-interface Props <B, PM, RM> extends ConfigurableViewProps {
-    machineHook: MachineHook<Context<B, PM, RM>, Schema, Event<PM, RM>>;
+interface Props <B, PM, RM, PE, RE> extends ConfigurableViewProps {
+    machineHook: MachineHook<Context<B, PM, RM>, Schema, Event<PM, RM, PE, RE>>;
 }
 
-export const MediaController = <B, PM, RM>({machineHook, iconOverrides}:Props<B, PM, RM>) => {
-    type MediaEvent = OmniEvent<Event<PM, RM>>;
+export const MediaController = <B, PM, RM, PE, RE>({machineHook, iconOverrides}:Props<B, PM, RM, PE, RE>) => {
+    type MediaEvent = OmniEvent<Event<PM, RM, PE, RE>>;
 
     const {state, service, context} = machineHook; 
 

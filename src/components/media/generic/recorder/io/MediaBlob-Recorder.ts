@@ -1,8 +1,11 @@
 import {RefObject} from "react";
 import {Recorder, RecorderCallbacks} from "components/media/generic/recorder/machine/MediaRecorder-Machine";
+import {MediaBuffer} from "components/media/generic/types/Media-Types";
 import { Option, none, some } from 'fp-ts/lib/Option';
+import {tryP, Future, FutureInstance} from "fluture";
 
-export type RecorderBuffer = Blob;
+export type RecorderError = string;
+
 export interface RecorderMeta {
     stream:MediaStream;
 }
@@ -15,7 +18,7 @@ export interface RecordingOptions {
 export const createRecorder = (opts:RecordingOptions) => {
 
 
-    return ():Recorder<RecorderBuffer, RecorderMeta> => {
+    return ():Recorder<MediaBuffer, RecorderMeta, RecorderError> => {
         let _recorder:Option<MediaRecorder> = none;
         let _chunks:Array<ArrayBuffer>;
 
@@ -28,10 +31,11 @@ export const createRecorder = (opts:RecordingOptions) => {
             _recorder = none;
         }
 
-        const start = async (callbacks:RecorderCallbacks<RecorderBuffer, RecorderMeta>):Promise<Option<RecorderBuffer>> => {
+        const start = (callbacks:RecorderCallbacks<MediaBuffer, RecorderMeta>):FutureInstance<RecorderError, Option<MediaBuffer>> => {
+            const futureDevice:FutureInstance<any, MediaStream> = tryP(() => navigator.mediaDevices.getUserMedia(opts));
 
-            return navigator.mediaDevices.getUserMedia(opts)
-                .then((stream) => new Promise<Option<RecorderBuffer>>(resolve  => {
+            return futureDevice.chain((stream) => 
+                new Future<RecorderError, Option<MediaBuffer>>((reject, resolve)  => {
                     callbacks.onMeta(some({
                         stream
                     }));
@@ -50,7 +54,8 @@ export const createRecorder = (opts:RecordingOptions) => {
                     }
                     
                     recorder.start();
-                }))
+                })
+            )
         }
 
         const dispose = () => {

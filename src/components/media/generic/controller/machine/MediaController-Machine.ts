@@ -17,13 +17,13 @@ export interface Schema {
     };
 }
 
-export type Event <PM, RM>=
+export type Event <PM, RM, PE, RE>=
     | { type: 'STOP' }
     | { type: 'PLAY' }
     | { type: 'RECORD' }
     | { type: 'ERASE' }
     | { type: 'META', data: PM | RM}
-    | { type: 'FAIL', reason: "player" | "recorder"};
+    | { type: 'FAIL', data: PE | RE};
 
 export interface Context <B, PM, RM> {
     buffer: Option<B>;
@@ -31,7 +31,7 @@ export interface Context <B, PM, RM> {
     recorderMeta: Option<RM>;
 }
 
-const makeConfig = <B, PM, RM>():MachineConfig<Context<B, PM, RM>, Schema, Event<PM, RM>> => ({
+const makeConfig = <B, PM, RM, PE, RE>():MachineConfig<Context<B, PM, RM>, Schema, Event<PM, RM, PE, RE>> => ({
     id: 'controller',
     initial: "empty",
     context: {
@@ -60,7 +60,7 @@ const makeConfig = <B, PM, RM>():MachineConfig<Context<B, PM, RM>, Schema, Event
                     cond: (ctx, _) => ctx.buffer.isSome()
                 }
             },
-            onEntry: ['stopTime', 'clearMeta']
+            onEntry: ['stopTime', 'clearMeta', log(() => "STOPPED?!?")]
         },
 
         recording: {
@@ -77,7 +77,8 @@ const makeConfig = <B, PM, RM>():MachineConfig<Context<B, PM, RM>, Schema, Event
                 META: {
                     actions: "updateRecorderMeta"
                 },
-                FAIL: "fail"
+                FAIL: "fail",
+
             },
             invoke: {
                 src: 'recorderMachine',
@@ -98,14 +99,16 @@ const makeConfig = <B, PM, RM>():MachineConfig<Context<B, PM, RM>, Schema, Event
                 META: {
                     actions: "updatePlayerMeta"
                 },
-                FAIL: "fail"
+                FAIL: "fail",
+
             },
 
             invoke: {
                 src: 'playerMachine',
                 id: 'invoked.player',
                 onDone: {
-                    target: "stopped" 
+                    target: "stopped",
+                    actions: send("FOO") 
                 },
                 data: {
                     buffer: (parentContext:Context<B, PM, RM>) => {
@@ -115,7 +118,7 @@ const makeConfig = <B, PM, RM>():MachineConfig<Context<B, PM, RM>, Schema, Event
                 }
             },
             onEntry: [
-                'startTime',
+                'startTime',log(() => "PLAYING?!?")
             ]
         },
 
@@ -127,7 +130,7 @@ const makeConfig = <B, PM, RM>():MachineConfig<Context<B, PM, RM>, Schema, Event
     }
 })
 
-const makeOptions = <B, PM, RM> (createPlayer: () => Player<B, PM>) => (createRecorder: () => Recorder<B, RM>) => (props:ActionProps) => {
+const makeOptions = <B, PM, RM, PE, RE> (createPlayer: () => Player<B, PM, PE>) => (createRecorder: () => Recorder<B, RM, RE>) => (props:ActionProps) => {
     return {
         actions: makeActions(props),
         services: makeServices(createPlayer) (createRecorder)
@@ -135,5 +138,5 @@ const makeOptions = <B, PM, RM> (createPlayer: () => Player<B, PM>) => (createRe
 }
 
 
-export const makeMachine = <B, PM, RM>(createPlayer: () => Player<B, PM>) => (createRecorder: () => Recorder<B, RM>) => (props:ActionProps) =>  
-    Machine<Context<B, PM, RM>, Schema, Event<PM, RM>>(makeConfig<B, PM, RM>(), makeOptions<B, PM, RM> (createPlayer) (createRecorder) (props));
+export const makeMachine = <B, PM, RM, PE, RE>(createPlayer: () => Player<B, PM, PE>) => (createRecorder: () => Recorder<B, RM, RE>) => (props:ActionProps) =>  
+    Machine<Context<B, PM, RM>, Schema, Event<PM, RM, PE, RE>>(makeConfig<B, PM, RM, PE, RE>(), makeOptions<B, PM, RM, PE, RE> (createPlayer) (createRecorder) (props));

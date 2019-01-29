@@ -19,13 +19,17 @@ export const makeActions = <B, M>() => ({
     updateParentMeta: sendParent((_:Context<B, M>, evt:DoneInvokeEvent<Option<M>>) => evt)
 })
 
-export const makeServices = <B, M>(createRecorder:() => Recorder<B, M>) => ({
-    startRecorder: (ctx:Context<B, M>, evt:Event<B, M>) => (cbSend, onEvent) => {
+export const makeServices = <B, M, E>(createRecorder:() => Recorder<B, M, E>) => ({
+    startRecorder: (ctx:Context<B, M>, evt:Event<B, M, E>) => (cbSend, onEvent) => {
         const recorder = createRecorder();
 
         recorder.start({
             onMeta: meta => cbSend({type: "META", data: meta}),
-        }).then(buffer => cbSend({type: "DONE", data: buffer}))
+        }).fork(
+            err => cbSend({type: "REJECT", data: err}),
+            buffer => cbSend({type: "RESOLVE", data: buffer})
+        )
+
 
         onEvent(evt => {
             if(evt.type === "STOP") {

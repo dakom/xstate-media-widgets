@@ -35,7 +35,7 @@ export const makeActions = <B, PM, RM>(props:ActionProps) => {
     }
 }
 
-export const makeServices = <B, PM, RM>(createPlayer: () => Player<B, PM>) => (createRecorder: () => Recorder<B, RM>) => ({
+export const makeServices = <B, PM, RM, PE, RE>(createPlayer: () => Player<B, PM, PE>) => (createRecorder: () => Recorder<B, RM, RE>) => ({
     playerMachine: makePlayerMachine(createPlayer),
     recorderMachine: makeRecorderMachine(createRecorder),
 })
