@@ -11,3 +11,11 @@ Everything is very decoupled and built around typescript generics. This makes it
 * Clear separation not only of logic, data, and view - but even further separating IO vs. state
 * Incredible power for composition. Many more widgets can be constructed from what's here, and it can be built upon for even more flexibility. For example, adding a generic "loader" statechart would open up the door for building drum-machines, video player, etc. all while keeping it super-duper-DRY
 * Despite all the above, strict compile-time checks and deterministic logic
+
+## TODO
+
+The clock runs completely independantly from the media, and for the purposes what I was kicking the tires on here, that's totally fine and maybe even a little interesting that they're independant. 
+
+Though it can drift pretty badly from the media timing especially if you wait a while before granting privacy permission.
+
+It'd be an improvement to drive the clock from the media on playback, but not sure if I'll get around to that here ;)
