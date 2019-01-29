@@ -43,7 +43,6 @@ value={current.getOrElse("") }
     {devices.map(device => {
         const {deviceId: id, label} = device;
         const name = label && label !== "" ? label : `(no label) ${id}`;
-        console.log(device, name);
         return (
             <option value={id} key={id} >
                 {name}
