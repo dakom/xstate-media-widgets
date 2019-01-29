@@ -11,6 +11,7 @@ Everything is very decoupled and built around typescript generics. This makes it
 * Clear separation not only of logic, data, and view - but even further separating IO vs. state
 * Incredible power for composition. Many more widgets can be constructed from what's here, and it can be built upon for even more flexibility. For example, adding a generic "loader" statechart would open up the door for building drum-machines, video player, etc. all while keeping it super-duper-DRY
 * Despite all the above, strict compile-time checks and deterministic logic
+* That point about deterministic logic is a _biggie_ ... especially when it's all there in an easy to parse format, makes everything much easier to reason about!
 
 ## TODO
 
