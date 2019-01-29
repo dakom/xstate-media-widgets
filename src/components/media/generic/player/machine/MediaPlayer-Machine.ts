@@ -17,7 +17,6 @@ export interface Player <B, M, E> {
 export interface Schema {
     states: {
         play: {};
-        fail: {};
         end: {};
     };
 }
@@ -62,7 +61,6 @@ const makeConfig = <B, M, E>():Config<B, M, E> => ({
                 },
 
                 REJECT: {
-                    target: "fail",
                     actions: sendParent((_, evt) => evt)
                 }
             },
@@ -77,9 +75,6 @@ const makeConfig = <B, M, E>():Config<B, M, E> => ({
             type: "final",
         },
 
-        fail: {
-            type: "final",
-        },
     }
 })
 

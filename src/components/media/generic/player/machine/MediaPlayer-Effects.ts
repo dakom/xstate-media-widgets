@@ -26,10 +26,7 @@ export const makeServices = <B, M, E>(createPlayer:() => Player<B, M, E>) => ({
             })
             .fork(
                 err => cbSend({type: "REJECT", data: err}),
-                () => {
-                    console.log("resolving....");
-                    cbSend("RESOLVE")
-                }
+                () => cbSend("RESOLVE")
             )
         })
 

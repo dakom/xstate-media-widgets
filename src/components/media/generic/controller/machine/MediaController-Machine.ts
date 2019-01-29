@@ -23,7 +23,7 @@ export type Event <PM, RM, PE, RE>=
     | { type: 'RECORD' }
     | { type: 'ERASE' }
     | { type: 'META', data: PM | RM}
-    | { type: 'FAIL', data: PE | RE};
+    | { type: 'REJECT', data: PE | RE};
 
 export interface Context <B, PM, RM> {
     buffer: Option<B>;
@@ -60,7 +60,7 @@ const makeConfig = <B, PM, RM, PE, RE>():MachineConfig<Context<B, PM, RM>, Schem
                     cond: (ctx, _) => ctx.buffer.isSome()
                 }
             },
-            onEntry: ['stopTime', 'clearMeta', log(() => "STOPPED?!?")]
+            onEntry: ['stopTime', 'clearMeta']
         },
 
         recording: {
@@ -77,7 +77,7 @@ const makeConfig = <B, PM, RM, PE, RE>():MachineConfig<Context<B, PM, RM>, Schem
                 META: {
                     actions: "updateRecorderMeta"
                 },
-                FAIL: "fail",
+                REJECT: "fail",
 
             },
             invoke: {
@@ -99,7 +99,7 @@ const makeConfig = <B, PM, RM, PE, RE>():MachineConfig<Context<B, PM, RM>, Schem
                 META: {
                     actions: "updatePlayerMeta"
                 },
-                FAIL: "fail",
+                REJECT: "fail",
 
             },
 
@@ -108,7 +108,6 @@ const makeConfig = <B, PM, RM, PE, RE>():MachineConfig<Context<B, PM, RM>, Schem
                 id: 'invoked.player',
                 onDone: {
                     target: "stopped",
-                    actions: send("FOO") 
                 },
                 data: {
                     buffer: (parentContext:Context<B, PM, RM>) => {
@@ -118,14 +117,16 @@ const makeConfig = <B, PM, RM, PE, RE>():MachineConfig<Context<B, PM, RM>, Schem
                 }
             },
             onEntry: [
-                'startTime',log(() => "PLAYING?!?")
+                'startTime'
             ]
         },
 
 
         fail: {
-            type: "final",
-            onEntry: 'handleFail' 
+            onEntry: 'handleFail',
+            on: {
+                "": "empty"
+            }
         },
     }
 })

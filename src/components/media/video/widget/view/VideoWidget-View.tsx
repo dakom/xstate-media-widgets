@@ -40,10 +40,14 @@ export const DevicePicker = ({devices, current, onSelected}:DevicePickerProps) =
         onChange={evt => onSelected(evt.target.value)}
 value={current.getOrElse("") } 
     >
-        {devices.map(({deviceId: id, label}) => 
+    {devices.map(device => {
+        const {deviceId: id, label} = device;
+        const name = label && label !== "" ? label : `(no label) ${id}`;
+        return (
             <option value={id} key={id} >
-            {label}
+                {name}
             </option>
-        )}
+        );
+    })}
     </select>
 

@@ -21,7 +21,6 @@ export interface Recorder <B, M, E> {
 export interface Schema {
     states: {
         record: {};
-        fail: {};
         end: {};
     };
 }
@@ -70,7 +69,6 @@ const makeConfig = <B, M, E>():Config<B, M, E> => ({
                     actions: 'replaceBuffer'
                 },
                 REJECT: {
-                    target: 'fail',
                     actions: sendParent((_, evt) => evt)
                 },
             }, 
@@ -82,10 +80,6 @@ const makeConfig = <B, M, E>():Config<B, M, E> => ({
                 buffer: (ctx:Context<B, M>) => ctx.buffer,
             }
         },
-
-        fail: {
-            type: "final",
-        }
     }
 })
 
