@@ -52,8 +52,8 @@ export function useMachine<
         const [context, setContext] = useState<TContext>(machine.context!);
 
         const service = useMemo(() => interpret<TContext, TState, TEvent>(machine)
-            .onTransition(state => setState(state as any))
-            .onChange(setContext)
+            .onTransition((state, _) => setState(state))
+            .onChange((context, _) => setContext(context))
             .start()
         , deps);
 
